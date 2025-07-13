@@ -1,10 +1,15 @@
 import { v4 as uuidv4 } from 'uuid';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  'https://wawkjsggcfmlvmplyvat.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indhd2tqc2dnY2ZtbHZtcGx5dmF0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MjQyMjE0MiwiZXhwIjoyMDY3OTk4MTQyfQ._QzA_M_-frVzhABZG5zEAmvcmXdonYYAW72_ZHsCauw'
+);
 
 export default async function handler(req, res) {
   const { code, state } = req.query;
 
   if (code) {
-    // Troca o code pelo access token
     const client_id = '5952073496283750';
     const client_secret = 'w6YhglIrqSopTWcfCH3MACW3F4yVvGwl';
     const redirect_uri = 'https://birashow-oauth-endpoint.vercel.app/api/mp-oauth-callback';
@@ -29,16 +34,33 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Erro ao trocar code pelo token', details: data });
       }
 
-      return res.status(200).json({ message: "Token recebido com sucesso!", token: data });
+      // Salva/atualiza o vendedor no Supabase
+      const { error } = await supabase
+        .from('vendedores')
+        .upsert({
+          id: state, // state = id do vendedor
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+          user_id: data.user_id,
+          public_key: data.public_key,
+          data_autorizacao: new Date().toISOString(),
+          atualizado_em: new Date().toISOString()
+        });
+
+      if (error) {
+        return res.status(500).json({ error: 'Erro ao salvar no Supabase', details: error.message });
+      }
+
+      return res.status(200).json({ message: "Token salvo com sucesso no Supabase!", vendedorId: state, token: data });
     } catch (error) {
       return res.status(500).json({ error: 'Erro interno ao trocar code pelo token', details: error.message });
     }
   }
 
-  // Se não tem code, gera o link de autorização
-  const newState = uuidv4();
+  // Gera o link de autorização com state = id do vendedor
+  const vendedorId = req.query.vendedorId || uuidv4();
   const client_id = '5952073496283750';
   const redirect_uri = encodeURIComponent('https://birashow-oauth-endpoint.vercel.app/api/mp-oauth-callback');
-  const link = `https://auth.mercadopago.com/authorization?client_id=${client_id}&response_type=code&platform_id=mp&state=${newState}&redirect_uri=${redirect_uri}`;
+  const link = `https://auth.mercadopago.com/authorization?client_id=${client_id}&response_type=code&platform_id=mp&state=${vendedorId}&redirect_uri=${redirect_uri}`;
   res.status(200).json({ message: "Callback funcionando!", link });
 } 
