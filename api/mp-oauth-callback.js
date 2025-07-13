@@ -8,4 +8,4 @@ export default function handler(req, res) {
   const redirect_uri = encodeURIComponent('https://birashow-oauth-endpoint.vercel.app/api/mp-oauth-callback');
   const link = `https://auth.mercadopago.com/authorization?client_id=${client_id}&response_type=code&platform_id=mp&state=${state}&redirect_uri=${redirect_uri}`;
   res.status(200).json({ message: "Callback funcionando!", link });
-} 
+}
