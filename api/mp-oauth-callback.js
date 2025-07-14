@@ -10,8 +10,8 @@ export default async function handler(req, res) {
   const { code, state } = req.query;
 
   if (code) {
-    const client_id = '5952073496283750';
-    const client_secret = 'w6YhglIrqSopTWcfCH3MACW3F4yVvGwl';
+    const client_id = '5814832504477005';
+    const client_secret = 'CseAQNMgENaOoMpAt7uBI8GdM8rH8qgz';
     const redirect_uri = 'https://birashow-oauth-endpoint.vercel.app/api/mp-oauth-callback';
 
     const params = new URLSearchParams();
