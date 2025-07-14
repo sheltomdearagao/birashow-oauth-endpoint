@@ -2,18 +2,19 @@ import { v4 as uuidv4 } from 'uuid';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
-  'https://vgkpqfsblggulrffzfhk.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3BxZnNibGdndWxyZmZ6ZmhrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTcyNDIyOCwiZXhwIjoyMDY3MzAwMjI4fQ.hNJ94EO5NU1GtQm2y3h4TkmV9JQLhrsFX6RZS8C2fko'
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 export default async function handler(req, res) {
   const { code, state } = req.query;
 
-  if (code) {
-    const client_id = '5814832504477005';
-    const client_secret = 'CseAQNMgENaOoMpAt7uBI8GdM8rH8qgz';
-    const redirect_uri = 'https://birashow-oauth-endpoint.vercel.app/api/mp-oauth-callback';
+  // Variáveis de ambiente Mercado Pago
+  const client_id = process.env.MP_CLIENT_ID;
+  const client_secret = process.env.MP_CLIENT_SECRET;
+  const redirect_uri = process.env.MP_REDIRECT_URI;
 
+  if (code) {
     const params = new URLSearchParams();
     params.append('grant_type', 'authorization_code');
     params.append('client_id', client_id);
@@ -48,7 +49,11 @@ export default async function handler(req, res) {
         }, { onConflict: ['id'] });
 
       if (error) {
-        return res.status(500).json({ error: 'Erro ao salvar no Supabase', details: error.message });
+        return res.status(500).json({
+          error: "Erro ao salvar no Supabase",
+          details: error.message,
+          supabaseError: error
+        });
       }
 
       return res.status(200).json({ message: "Token salvo com sucesso no Supabase!", vendedorId: data.user_id, token: data });
@@ -59,8 +64,7 @@ export default async function handler(req, res) {
 
   // Gera o link de autorização com state = id do vendedor
   const vendedorId = req.query.vendedorId || uuidv4();
-  const client_id = '5952073496283750';
-  const redirect_uri = encodeURIComponent('https://birashow-oauth-endpoint.vercel.app/api/mp-oauth-callback');
-  const link = `https://auth.mercadopago.com/authorization?client_id=${client_id}&response_type=code&platform_id=mp&state=${vendedorId}&redirect_uri=${redirect_uri}`;
+  const redirect_uri_encoded = encodeURIComponent(redirect_uri);
+  const link = `https://auth.mercadopago.com/authorization?client_id=${client_id}&response_type=code&platform_id=mp&state=${vendedorId}&redirect_uri=${redirect_uri_encoded}`;
   res.status(200).json({ message: "Callback funcionando!", link });
 } 
