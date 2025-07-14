@@ -2,8 +2,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
-  'https://wawkjsggcfmlvmplyvat.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indhd2tqc2dnY2ZtbHZtcGx5dmF0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MjQyMjE0MiwiZXhwIjoyMDY3OTk4MTQyfQ._QzA_M_-frVzhABZG5zEAmvcmXdonYYAW72_ZHsCauw'
+  'https://vgkpqfsblggulrffzfhk.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3BxZnNibGdndWxyZmZ6ZmhrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTcyNDIyOCwiZXhwIjoyMDY3MzAwMjI4fQ.hNJ94EO5NU1GtQm2y3h4TkmV9JQLhrsFX6RZS8C2fko'
 );
 
 export default async function handler(req, res) {
