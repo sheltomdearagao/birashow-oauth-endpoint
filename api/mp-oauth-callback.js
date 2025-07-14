@@ -34,24 +34,24 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Erro ao trocar code pelo token', details: data });
       }
 
-      // Salva/atualiza o vendedor no Supabase
+      // Usa o user_id do Mercado Pago como id do vendedor
       const { error } = await supabase
         .from('vendedores')
         .upsert({
-          id: state, // state = id do vendedor
+          id: data.user_id, // user_id do Mercado Pago como identificador
           access_token: data.access_token,
           refresh_token: data.refresh_token,
           user_id: data.user_id,
           public_key: data.public_key,
           data_autorizacao: new Date().toISOString(),
           atualizado_em: new Date().toISOString()
-        });
+        }, { onConflict: ['id'] });
 
       if (error) {
         return res.status(500).json({ error: 'Erro ao salvar no Supabase', details: error.message });
       }
 
-      return res.status(200).json({ message: "Token salvo com sucesso no Supabase!", vendedorId: state, token: data });
+      return res.status(200).json({ message: "Token salvo com sucesso no Supabase!", vendedorId: data.user_id, token: data });
     } catch (error) {
       return res.status(500).json({ error: 'Erro interno ao trocar code pelo token', details: error.message });
     }
